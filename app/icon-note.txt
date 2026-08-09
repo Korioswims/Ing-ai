@@ -1,0 +1,1 @@
+The browser icon is in app/icon.svg.
