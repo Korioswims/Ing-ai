@@ -1,0 +1,1 @@
+Ing uses app/icon.svg as its browser tab icon.
