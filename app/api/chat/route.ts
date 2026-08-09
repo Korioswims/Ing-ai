@@ -50,6 +50,46 @@ function cleanIngResponse(text: string): string {
     .trim();
 }
 
+function getModelText(content: unknown): string {
+  if (typeof content === "string") return content;
+  if (!Array.isArray(content)) return "";
+
+  return content
+    .map((part: unknown) => {
+      if (typeof part === "string") return part;
+      if (part && typeof part === "object" && "text" in part) {
+        const text = (part as { text?: unknown }).text;
+        return typeof text === "string" ? text : "";
+      }
+      return "";
+    })
+    .filter(Boolean)
+    .join("\n");
+}
+
+function getEmptyResponseFallback(messages: IncomingMessage[]): string {
+  const lastUserMessage = [...messages].reverse().find((message) => message.role === "user")?.content.trim() || "";
+  const lower = lastUserMessage.toLowerCase();
+
+  if (/\b(failed|fail|flunked|didn't pass|did not pass)\b/.test(lower) && /\b(exam|test|class|course)\b/.test(lower)) {
+    return "Aw man 😞💙 I'm really sorry. That sounds like a horrible feeling, especially if college feels like it's suddenly on the line. You can rant to me if you want — I'm listening.";
+  }
+
+  if (/\b(sad|crying|depressed|heartbroken|devastated|awful|terrible)\b/.test(lower)) {
+    return "Aw man 😞💙 I'm sorry. That sounds really rough. I'm here if you want to talk about it.";
+  }
+
+  if (/\b(excited|happy|yay|finally|did it|passed)\b/.test(lower)) {
+    return "YOOOO 😭🎉 LET'S GOOOO!! That's awesome!!";
+  }
+
+  if (/\b(lol|lmao|haha|😭|😂|💀)\b/.test(lower)) {
+    return "LMAOOO 😭💀 okay, I'm listening.";
+  }
+
+  return "I'm Ing! I'm listening. 😊";
+}
+
 export async function POST(request: Request) {
   try {
     const apiKey = process.env.OPENROUTER_API_KEY;
@@ -77,8 +117,9 @@ export async function POST(request: Request) {
     }
 
     const rawText = data?.choices?.[0]?.message?.content;
-    const text = typeof rawText === "string" ? cleanIngResponse(rawText) : "";
-    return Response.json({ text: text || "I'm Ing! What should we talk about? 😊" });
+    const modelText = getModelText(rawText);
+    const text = modelText ? cleanIngResponse(modelText) : getEmptyResponseFallback(messages);
+    return Response.json({ text: text || "I'm Ing! I'm listening. 😊" });
   } catch (error: unknown) {
     console.error("Ing OpenRouter error:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
