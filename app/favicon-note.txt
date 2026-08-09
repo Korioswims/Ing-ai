@@ -1,0 +1,1 @@
+Ing favicon is provided by app/icon.svg.
