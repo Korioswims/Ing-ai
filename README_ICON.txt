@@ -1,0 +1,1 @@
+Browser icon: app/icon.svg
