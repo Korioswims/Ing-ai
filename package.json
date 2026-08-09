@@ -7,10 +7,9 @@
     "build": "next build",
     "start": "next start"
   },
-  "engines": {
-    "node": ">=22"
-  },
+  "engines": { "node": ">=22" },
   "dependencies": {
+    "@supabase/supabase-js": "^2.57.4",
     "next": "15.5.7",
     "openai": "^7.1.0",
     "react": "19.1.0",
