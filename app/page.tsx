@@ -8,6 +8,7 @@ type Message = { role: "user" | "assistant"; content: string };
 type Chat = { id: string; title: string; messages: Message[]; updatedAt: number };
 const STORAGE_KEY = "ing-chats-v1";
 const MEMORY_KEY = "ing-memories-v1";
+const ING_LOGO = "/icon.svg";
 
 function newChat(): Chat { return { id: crypto.randomUUID(), title: "New chat", messages: [], updatedAt: Date.now() }; }
 
@@ -125,7 +126,7 @@ export default function Home() {
   return <main className="app-shell">
     {sidebarOpen && <button className="sidebar-backdrop" aria-label="Close sidebar" onClick={() => setSidebarOpen(false)} />}
     <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
-      <div className="sidebar-head"><div className="brand"><span className="logo">I</span> Ing</div><button className="close-sidebar" onClick={() => setSidebarOpen(false)} aria-label="Close">×</button></div>
+      <div className="sidebar-head"><div className="brand"><img src={ING_LOGO} alt="Ing" className="brand-logo" /> <span>Ing</span></div><button className="close-sidebar" onClick={() => setSidebarOpen(false)} aria-label="Close">×</button></div>
       <button className="new-chat" onClick={createChat}>＋ New chat</button>
       {supabase ? <button className="account-button" onClick={() => user ? void signOut() : setAuthOpen(true)}>{user ? `☁️ ${user.email}` : "👤 Sign in / create account"}</button> : <div className="cloud-offline">Cloud sync isn't configured yet.</div>}
       <button className="memory-button" onClick={() => setMemoryOpen((open) => !open)}>🧠 Memory <span>{memories.length}</span></button>
@@ -136,7 +137,7 @@ export default function Home() {
     </aside>
     <section className="main-panel">
       <header className="topbar"><button className="menu-button" onClick={() => setSidebarOpen(true)} aria-label="Open sidebar">☰</button><div className="mobile-title">{activeChat?.title || "Ing"}</div><div className="status">AI assistant</div></header>
-      <section className="chat">{messages.length === 0 ? <div className="welcome"><h1>How can I help?</h1><p>Ask Ing anything. Your chats and memories are here.</p></div> : <div className="messages">{messages.map((message, index) => <div className={`message ${message.role}`} key={`${message.role}-${index}`}><div className="avatar">{message.role === "user" ? "You" : "I"}</div><div className="bubble">{message.content}</div></div>)}{loading && <div className="message assistant"><div className="avatar">I</div><div className="bubble">Thinking…</div></div>}</div>}<form className="composer" onSubmit={sendMessage}><textarea value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={onKeyDown} placeholder="Message Ing…" rows={1} disabled={loading} /><button className="send" type="submit" disabled={!input.trim() || loading} aria-label="Send">↑</button></form><div className="hint">Enter to send · Shift+Enter for a new line</div></section>
+      <section className="chat">{messages.length === 0 ? <div className="welcome"><img src={ING_LOGO} alt="Ing" className="welcome-logo" /><h1>How can I help?</h1><p>Ask Ing anything. Your chats and memories are here.</p></div> : <div className="messages">{messages.map((message, index) => <div className={`message ${message.role}`} key={`${message.role}-${index}`}><div className="avatar">{message.role === "user" ? "You" : <img src={ING_LOGO} alt="Ing" className="message-logo" />}</div><div className="bubble">{message.content}</div></div>)}{loading && <div className="message assistant"><div className="avatar"><img src={ING_LOGO} alt="Ing" className="message-logo" /></div><div className="bubble">Thinking…</div></div>}</div>}<form className="composer" onSubmit={sendMessage}><textarea value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={onKeyDown} placeholder="Message Ing…" rows={1} disabled={loading} /><button className="send" type="submit" disabled={!input.trim() || loading} aria-label="Send">↑</button></form><div className="hint">Enter to send · Shift+Enter for a new line</div></section>
     </section>
     {authOpen && <div className="auth-overlay"><form className="auth-card" onSubmit={submitAuth}><button type="button" className="auth-close" onClick={() => setAuthOpen(false)}>×</button><h2>{authMode === "signin" ? "Welcome back" : "Create your Ing account"}</h2><p>{authMode === "signin" ? "Sign in to sync your chats and memories." : "Your chats and memories will follow you between devices."}</p><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required /><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" minLength={6} required /><button className="auth-submit" disabled={authBusy}>{authBusy ? "Working…" : authMode === "signin" ? "Sign in" : "Create account"}</button>{authMessage && <div className="auth-message">{authMessage}</div>}<button type="button" className="auth-switch" onClick={() => { setAuthMode(authMode === "signin" ? "signup" : "signin"); setAuthMessage(""); }}>{authMode === "signin" ? "Need an account? Sign up" : "Already have an account? Sign in"}</button></form></div>}
   </main>;
